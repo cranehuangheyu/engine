@@ -223,8 +223,10 @@ export class LineModel extends scene.Model {
     }
 
     public updateIA (count: number) {
-        const ia = this._subModels[0].inputAssembler;
-        ia.vertexBuffers[0].update(this._vdataF32!);
+        if (this._subModels[0]) {
+            const ia = this._subModels[0].inputAssembler;
+            ia.vertexBuffers[0].update(this._vdataF32!);
+        }
         this._iaInfo.drawInfos[0].firstIndex = 0;
         this._iaInfo.drawInfos[0].indexCount = this._indexCount * count;
         this._iaInfoBuffer.update(this._iaInfo);
