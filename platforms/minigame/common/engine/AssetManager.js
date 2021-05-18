@@ -14,6 +14,7 @@ presets['scene'].maxRequestsPerFrame = 64;
 let subpackages = {};
 
 function downloadScript (url, options, onComplete) {
+    // test
     if (REGEX.test(url)) {
         onComplete && onComplete(new Error('Can not load remote scripts'));
     }
