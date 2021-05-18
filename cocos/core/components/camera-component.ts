@@ -529,6 +529,31 @@ export class Camera extends Component {
         return out;
     }
 
+    // ui局部坐标转成3d坐标
+    public convertUITo3dNode (uiNode: Node, out?: Vec3) {
+        if (!out) {
+            out = new Vec3();
+        }
+        if (!this._camera) { return out; }
+
+        if (!uiNode.parent) { return out; }
+        const cmp = uiNode.parent!.getComponent('cc.UITransform') as UITransform;
+        if (cmp) {
+            uiNode.getPosition(_temp_vec3_1);
+            cmp.convertToWorldSpaceAR(_temp_vec3_1, _temp_vec3_1);
+        } else {
+            return out;
+        }
+
+        const designSize = view.getVisibleSize();
+        out.x = ( _temp_vec3_1.x - designSize.width * 0.5) * legacyCC.view.getScaleX();
+        out.y = (_temp_vec3_1.y - designSize.height * 0.5) * legacyCC.view.getScaleY();
+        out.x += this._camera.width * 0.5;
+        out.y += this._camera.height * 0.5;
+
+        return out;
+    }
+
     public _createCamera () {
         if (!this._camera) {
             this._camera = (legacyCC.director.root as Root).createCamera();

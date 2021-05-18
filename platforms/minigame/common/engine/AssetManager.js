@@ -182,44 +182,59 @@ function downloadBundle (nameOrUrl, options, onComplete) {
                 js = `assets/${bundleName}/index.${suffix}js`;
             }
         }
-        require('../../../' + js);
-        downloader.importBundleEntry(bundleName).then(function() {
+        var downloadZipMy = function downloadZipMy() {
             options.__cacheBundleRoot__ = bundleName;
-            var config = `${url}/config.${suffix}json`;
+            var config = "".concat(url, "/config.").concat(suffix, "json");
             downloadJson(config, options, function (err, data) {
                 if (err) {
+                onComplete && onComplete(err);
+                return;
+                }
+        
+                if (data.isZip) {
+                var zipVersion = data.zipVersion;
+                var zipUrl = "".concat(url, "/res.").concat(zipVersion ? zipVersion + '.' : '', "zip");
+                handleZip(zipUrl, options, function (err, unzipPath) {
+                    if (err) {
                     onComplete && onComplete(err);
                     return;
-                }
-                if (data.isZip) {
-                    let zipVersion = data.zipVersion;
-                    let zipUrl = `${url}/res.${zipVersion ? zipVersion + '.' : ''}zip`;
-                    handleZip(zipUrl, options, function (err, unzipPath) {
-                        if (err) {
-                            onComplete && onComplete(err);
-                            return;
-                        }
-                        data.base = unzipPath + '/res/';
-                        // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
-                        // to remove in the future
-                        let sys = cc.sys;
-                        if (sys.platform === sys.ALIPAY_MINI_GAME && sys.os === sys.OS_ANDROID) {
-                            let resPath = unzipPath + 'res/';
-                            if (fs.accessSync({path: resPath})) {
-                                data.base = resPath;
-                            }
-                        }
-                        onComplete && onComplete(null, data);
-                    });
-                }
-                else {
-                    data.base = url + '/';
+                    }
+        
+                    data.base = unzipPath + '/res/'; // PATCH: for android alipay version before v10.1.95 (v10.1.95 included)
+                    // to remove in the future
+        
+                    var sys = cc.sys;
+        
+                    if (sys.platform === sys.ALIPAY_MINI_GAME && sys.os === sys.OS_ANDROID) {
+                    var resPath = unzipPath + 'res/';
+        
+                    if (fs.accessSync({
+                        path: resPath
+                    })) {
+                        data.base = resPath;
+                    }
+                    }
+        
                     onComplete && onComplete(null, data);
+                });
+                } else {
+                data.base = url + '/';
+                onComplete && onComplete(null, data);
                 }
             });
-        }).catch(function(err) {
-            onComplete && onComplete(err);
-        });
+            };
+        
+            if (bundleName == "main" ||
+                bundleName == "resources") {
+                require('../../../' + js);
+                downloader.importBundleEntry(bundleName).then(function () {
+                    downloadZipMy()
+                })["catch"](function (err) {
+                    onComplete && onComplete(err);
+                });
+            } else {
+                downloadZipMy()
+            }
         
     }
 };
