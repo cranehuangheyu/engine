@@ -64,14 +64,18 @@ export function downloadAudio (url: string, options: IDownloadParseOptions, onCo
         return;
     }
     let handler: DownloadHandler | null = null;
-    if (!__audioSupport.WEB_AUDIO) {
+    if(sys.os = sys.OS_IOS){
         handler = downloadDomAudio;
-    } else {
-        // web audio need to download file as arrayBuffer
-        if (options.audioLoadMode !== AudioType.DOM_AUDIO) {
-            handler = downloadArrayBuffer;
-        } else {
+    }else{
+        if (!__audioSupport.WEB_AUDIO) {
             handler = downloadDomAudio;
+        } else {
+            // web audio need to download file as arrayBuffer
+            if (options.audioLoadMode !== AudioType.DOM_AUDIO) {
+                handler = downloadArrayBuffer;
+            } else {
+                handler = downloadDomAudio;
+            }
         }
     }
     handler(url, options, onComplete);
