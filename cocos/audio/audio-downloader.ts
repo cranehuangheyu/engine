@@ -64,7 +64,7 @@ export function downloadAudio (url: string, options: IDownloadParseOptions, onCo
         return;
     }
     let handler: DownloadHandler | null = null;
-    if(sys.os = sys.OS_IOS){
+    if(sys.os == sys.OS_IOS){
         handler = downloadDomAudio;
     }else{
         if (!__audioSupport.WEB_AUDIO) {
